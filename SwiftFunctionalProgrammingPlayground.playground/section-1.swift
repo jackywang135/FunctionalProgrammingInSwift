@@ -303,7 +303,7 @@ func sumByReduce(xs:[Int]) -> Int {
 }
 
 func concatenateUsingReduce(xs:[String]) -> String {
-	return reduce(xs, "", {result, x in result + x} )
+	return reduce(xs, "", {result, x in result + x})
 }
 
 let str1 = "2"
@@ -312,5 +312,113 @@ let str3 = str1 + str2
 
 let player = concatenateUsingReduce(stringArray)
 player
+
+let reducedPlayer = stringArray.reduce("", combine: +)
+println(reducedPlayer)
+
+func mapUsingReduce<T,U>(xs:[T], f:T->U) -> [U]{
+	return xs.reduce([], combine: {result, x in result + [f(x)]})
+}
+
+func filterUsingReduce<T>(xs:[T], check: T -> Bool) -> [T]{
+	return xs.reduce([]){result, x in
+		return check(x) ? result + [x] : result }
+}
+
+//Reduce - iterating over an array to compute a result 
+
+
+
+struct City {
+	let name: String
+	let population : Int
+}
+
+let Paris = City(name: "Paris", population:2243)
+let Taipei = City(name: "Taipei", population: 3434)
+let SF = City(name: "SF", population: 23224)
+
+let cities = [Paris, Taipei, SF]
+
+func scale(city: City) -> City {
+	return City(name: city.name, population: city.population * 1000)
+}
+
+let citiesS = cities.filter({ city in city.population > 1000 }).map(scale).reduce(""){result, city in
+		return result + "\n" + "\(city.name) : \(city.population)"
+}
+
+citiesS
+
+// Using generics allows you to write flexible functions without compro- mising type safety
+
+//Optionals 
+
+var citiesDict = ["Paris":25000, "Taipei":23222, "SF":23242]
+
+let madridPopulation : Int? = citiesDict["Madrid"]
+
+if madridPopulation != nil {
+	println(madridPopulation)
+} else {
+	println("unknown city")
+}
+
+// Optional Binding -
+// Optional binding encourages you to handle exceptional cases explicitly, thereby avoiding runtime errors.
+
+if let taichungPopulation = citiesDict["TaichungPopulation"] {
+	println(taichungPopulation)
+} else {
+	println("unknown city")
+}
+//The ?? provides a safer alternative to the forced optional unwrapping, without being as verbose as the optional binding.
+
+func ??<T>(optional:T?, defaultValue:() -> T) -> T {
+	if let x = optional {
+		return x
+	} else {
+		return defaultValue()
+	}
+}
+
+
+var cityPop : Int? = citiesDict["KaoShung"] ?? {3444}()
+
+cityPop //It only operates 3444 when the result is nil
+
+//AutoClosure allows you to pass an expression without the { } around it for better code readability. 
+//Why do you need to pass in { }? Because if you pass in the expression on its own, the compiler would execute it even if the condition to execute whatever is within the { } doesn't qualify. If the expression is an expensive computation, we want to be more efficient and only execute it when the conditions are met. 
+
+//SO in other words, expression is simplified from {expression}(), here's an example:
+
+func complicatdExpression()-> Int {
+	return 23929439
+}
+
+var cityPop1 : Int? = citiesDict["KaoShung"] ?? 23929439
+var cityPop2 : Int? = citiesDict["KaoShung"] ?? complicatdExpression()
+
+//^ 2 are the same thing, However, the complicatedExpression is only evaluated if the cities["Kaoshung"] turns out not to be nil. Without auotclosure, the complicatedExpression would be ran even if the citiesDist isn't nil, which is unnecesary 
+
+//Optional Chaining 
+
+func mapOptionalArray<U,T>(optioinalXS:[U?], f:U -> T) -> [T] {
+	var result : [T] = []
+	for x in optioinalXS {
+		if let y = x {
+			result.append(f(y))
+		}
+	}
+	return result
+}
+
+let optionalArray : [Int?] = [nil, 12, 32]
+
+let arrayResult = mapOptionalArray(optionalArray){x in
+	return "\(x)"}
+
+println(arrayResult)
+
 
 
